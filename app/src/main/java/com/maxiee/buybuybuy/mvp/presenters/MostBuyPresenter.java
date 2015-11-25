@@ -6,7 +6,9 @@ import android.util.Log;
 
 import com.maxiee.buybuybuy.model.entities.MostBuy;
 import com.maxiee.buybuybuy.model.rest.BuyRepository;
+import com.maxiee.buybuybuy.mvp.views.MostBuyView;
 import com.maxiee.buybuybuy.mvp.views.View;
+import com.maxiee.buybuybuy.views.adapter.MostBuyAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +22,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by maxiee on 15/11/25.
  */
-public class MostBuyPresenter implements Presenter {
+public class MostBuyPresenter implements Presenter, MostBuyAdapter.RecyclerClickListener {
 
     private final Context mContext;
     private final BuyRepository mBuyRepository;
@@ -28,6 +30,7 @@ public class MostBuyPresenter implements Presenter {
     private Subscription mMostBuySubscription;
 
     private MostBuy mMostBuyData;
+    private MostBuyView mMostBuyView;
 
     @Inject
     public MostBuyPresenter(Context context, BuyRepository repository) {
@@ -53,7 +56,7 @@ public class MostBuyPresenter implements Presenter {
 
     @Override
     public void attachView(View v) {
-
+        mMostBuyView = (MostBuyView) v;
     }
 
     @Override
@@ -68,7 +71,7 @@ public class MostBuyPresenter implements Presenter {
 
     private void askForMostBuyData() {
         Map<String, String> options = new HashMap<>();
-        options.put("count", String.valueOf(1));
+        options.put("count", String.valueOf(9));
         options.put("_", String.valueOf(System.currentTimeMillis()));
         mMostBuySubscription = mBuyRepository.getMostBuy(options)
                 .subscribeOn(Schedulers.newThread())
@@ -79,6 +82,12 @@ public class MostBuyPresenter implements Presenter {
                             "时间:%s,数目:%d",
                             mMostBuyData.getTitle(),
                             mMostBuyData.getList().size()));
+                    mMostBuyView.bindMostBuyList(mMostBuyData.getList());
                 });
+    }
+
+    @Override
+    public void onElementClick(int position, android.view.View sharedView) {
+
     }
 }
